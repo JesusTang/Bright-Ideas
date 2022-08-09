@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <title>One Idea</title>
+</head>
+<body style="background-color: #f1f1f1;">
+
+
+    <nav class="navbar navbar-expand" style="background-color: #ece0ce;">
+        <div class="container-fluid">
+            <ul class="navbar-nav m-0  justify-content-between" style="width: inherit;">
+                <li><h2><a href="/dashboard" style="text-decoration: none; color: black;">Tinker</a></h2></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Topics</a>
+                    <ul class="dropdown-menu">
+                        {% for topic in topics %}
+                        <li><a class="dropdown-item" href="/topic/{{topic.id}}">{{topic.topic_name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li class="nav-item col-5">
+                    <form class="d-flex input-group" role="search" action="/search-for-idea" method="POST">
+                        <input name="search_for" id="search_for" class="form-control" type="text" placeholder="Search">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/idea/create">Create Idea</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/{{session.id}}">My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/process-logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-7">
+                <div class="row mt-5">
+                    <div class="box bg-light p-3 rounded position-relative" style="box-shadow: 1px 5px 15px;">
+                        <h5 class="">{{idea.title}}</h5>
+                        {% if idea.user_id == session.id %}
+                        <a href="/delete-idea-{{idea.id}}">
+                            <button class="btn btn-close position-absolute top-0 start-100 translate-middle text-center bg-light border border-light rounded-3">
+                                <span class="visually-hidden">Delete idea</span>
+                            </button>
+                        </a>
+                        {% endif %}
+                        <h6 class="fw-lighter d-flex align-items-center justify-content-between">
+                            <div>
+                                <span>Topic: <a href="/topic/{{idea.topic_id}}" style="color:black;">{{idea.topic_name}}</a></span> 
+                                <span>Posted by: <a href="/user/{{idea.user_id}}" style="color:black;">{{idea.first_name}} {{idea.last_name}}</a></span> 
+                            </div>
+                            <!-- <button class="btn">Report</button> -->
+                        </h6>
+                        <p class="text-muted fw-lighter m-1 fst-italic" style="font-size: 14px;">Posted on: {{idea.created_at}}</p>
+                        <p>{{idea.idea_description}}
+                        </p>
+                        <h6 class="fw-normal">{{idea.idea_expanded}}</h6>
+                        <div class="justify-content-between d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-start">
+                            {% if session.id in idea.liked_by_ids %}
+                                <a class="btn" href="/delete-like-idea-{{idea.id}}-user-{{session.id}}-redirect_to_self">unlike</a>
+                            {% else %}
+                                <a class="btn" href="/create-like-idea-{{idea.id}}-user-{{session.id}}-redirect_to_self">like</a>
+                            {% endif %}
+                            <h6 class="ms-2 mb-0">{{idea.n_likes}} Likes</h6> 
+                            </div>
+                            <div class="">Comments <span class="badge text-bg-secondary">{{idea.n_comments}}</span></div>
+                        </div>
+                        <br>
+                        <hr>
+                        <br>
+
+                        <!-- HERE GO ALL THE COMMENTS -->
+
+                        <h5>Comment section:</h5>
+                        <form action="/creating-comment-for-idea-{{idea.id}}" class="d-flex flex-column mb-3" method="POST">
+                            <textarea name="comment_description" id="comment_description" cols="30" rows="5" placeholder="What do you think?" class="form-control d-block "></textarea>
+                            <button class="btn align-self-end bg-secondary mt-2 text-white" type="submit">Submit!</button>
+                        </form>
+                        {% for comment in idea.comments %}
+                        <div class="p-2 position-relative">
+                            {% if comment.user_id == session.id %}
+                            <a href="/delete-comment-{{comment.id}}" class="position-absolute top-40 start-100 translate-middle">
+                                <button class="btn btn-close  bg-light border border-light rounded-3">
+                                    <span class="visually-hidden">Delete comment</span>
+                                </button>
+                            </a>
+                            {% endif %}
+                            <h6 class="fw-lighter d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <a href="#" style="color:black;">{{comment.first_name}} {{comment.last_name}}</a>
+                                    <p class="text-muted fw-lighter m-1 fst-italic ms-1" style="font-size: 14px;">on {{comment.created_at}}</p>
+                                </div>
+                                <!-- <button class="btn">Report</button> -->
+                            </h6>
+                            <p>{{comment.comment_description}}
+                            </p>
+                            <div class="d-flex mt-2">
+                                <div class="d-flex align-items-center ">
+                                    {% if session.id in comment.liked_by_ids %}
+                                    <a class="btn text-secondary" href="/delete-like-comment-{{comment.id}}-user-{{session.id}}-{{idea.id}}">unlike</a>
+                                    {% else %}
+                                    <a class="btn text-secondary" href="/create-like-comment-{{comment.id}}-user-{{session.id}}-{{idea.id}}">like</a>
+                                    {% endif %}
+                                    <h6 class="ms-2 mb-0">{{comment.n_likes}} Likes</h6> 
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-3 ms-5">
+                <div class="row mt-5 justify-content-center">
+                    <div class="bg-light rounded p-4 d-flex flex-column" style="box-shadow: 1px 5px 15px;">
+                        <h4>Hottest Topics</h4>
+                        <div class="list-group">
+                            {% for topic in topics %}
+                            <a href="/topic/{{topic.id}}" class="list-group-item list-group-item-action">{{topic.topic_name}}</a>
+                            {% endfor %}
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+</body>
+</html>
