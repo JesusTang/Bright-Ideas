@@ -106,17 +106,13 @@ def search_for():
         print(f'THIS SHOULD BE WORKING, BUT IT IS NOT LOOKING FOR ANYTHING')
         return redirect('/dashboard')
     data = request.form['search_for']
-    # IDEA_REGEX = re.compile('({data})') 
     ideas2 = Idea.get_ideas_with_users_and_topics()
     ideas = []
     for idea in ideas2:
         print(idea.idea_description)
-        # if IDEA_REGEX.match(str(idea.idea_description)):
         if re.search(f'((?i){data}(?i))', idea.idea_description):
             ideas.append(idea)
     topics = Topic.get_all_topics()
-    print(ideas)
-    print(f'THIS SHOULD BE WORKING, LOOKING FOR {data}')
     return render_template('dashboard.html', ideas = ideas, topics = topics)
 
 
