@@ -102,18 +102,16 @@ def show_one_idea(idea_id):
 
 @app.route('/search-for-idea', methods=['POST'])
 def search_for():
-    if not request.form['search_for']:
-        print(f'THIS SHOULD BE WORKING, BUT IT IS NOT LOOKING FOR ANYTHING')
+    if not request.form['search_for']:                  #1 Esto hace que si no hayas buscado nada, redireccione al dashboard
         return redirect('/dashboard')
     data = request.form['search_for']
-    ideas2 = Idea.get_ideas_with_users_and_topics()
-    ideas = []
-    for idea in ideas2:
-        print(idea.idea_description)
-        if re.search(f'((?i){data}(?i))', idea.idea_description):
-            ideas.append(idea)
-    topics = Topic.get_all_topics()
-    return render_template('dashboard.html', ideas = ideas, topics = topics)
+    all_ideas = Idea.get_ideas_with_users_and_topics()     #2 Aqui saco todas las ideas 
+    matching_ideas = []                                    #5 Este array con todas las ideas que coincidieron con lo buscado es el que termino pasando al render template html
+    for idea in all_ideas:                                 #3 Aqui hago un for loop para cada idea de entre todas
+        if re.search(f'((?i){data}(?i))', idea.idea_description):   #4 Aqui lo que hago es ver si coinciden lo que se buscó, o sea data = request.form['search_for'] con la 
+            matching_ideas.append(idea)                                      #  descripcion de cada idea. Si coinciden, meto esta idea al array de la linea 109 
+    topics = Topic.get_all_topics()                     #Lo de los topics no le hagas caso, es otra cosa que no tiene que ver xd
+    return render_template('dashboard.html', ideas = matching_ideas, topics = topics)
 
 
 
